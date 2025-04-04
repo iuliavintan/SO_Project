@@ -12,10 +12,17 @@ int main(int argc, char *argv[])
         {
             add(argv[2]);
         }
+        else if(strcmp(argv[1], "--list")==0)
+        {
+            list(argv[2]);
+        }
         else
         {
             printf("Another option with 3 arguments!\n");
         }
+
+
+
     }
     else
     {

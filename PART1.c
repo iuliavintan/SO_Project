@@ -7,6 +7,7 @@
 #include<string.h>
 #include<fcntl.h>
 #include<unistd.h>
+#include<time.h>
 #include"PART1.h"
 
 treasure *new_treasure()
@@ -88,8 +89,76 @@ void add(char hunt[10])
     }
 
     sprintf(buf, "%d, %s, %f, %f, %s, %d\n", comoara->id, comoara->name, comoara->longitude, comoara->latitude, comoara->clue, comoara->value);
-    write(fd, buf, strlen(buf));
+    
+    if(write(fd, buf, strlen(buf))==-1)
+    {
+        perror("Unable to add new treasure:(");
+        free(buf);
+        close(fd);
+        exit(-1);
+    }
+    else
+    {
+        printf("=====================================\n");
+        printf("New treasure added succesfully!\n");
+    }
+    
     free(buf);
+    close(fd);
+    closedir(director);
+}
+
+void read_file(int f)
+{
+
+	char buffer[4096];
+	while(read(f,buffer,sizeof(buffer)))
+	{
+		write(1, buffer, strlen(buffer));
+    }
+}
+
+void list(char hunt[10])
+{
+    DIR *director;
+    director=opendir(hunt);
+
+    if(director==NULL)
+    {
+        printf("The hunt you provided doesn't exist!\n");
+        exit(-1);
+    }
+    
+    struct stat fisi_stat;
+
+    char path[50];
+    strcpy(path, hunt);
+    strcat(path, "/game.txt");
+
+    int fd=open(path, O_RDONLY, 0777);
+
+    if(fd==-1)
+    {
+        perror("Failed to open treasure file!:(");
+        exit(-1);
+    }
+
+    if(stat(path, &fisi_stat)==-1)
+    {
+        printf("Error! Failed to obtain information from file!:(");
+        close(fd);
+        closedir(director);
+        exit(-1);
+    }
+
+    printf("Hunt name: %s\n", hunt);
+    printf("File size: %ld bytes\n", fisi_stat.st_size);
+    printf("Last modification made: %s", ctime(&fisi_stat.st_atim.tv_sec));
+    printf("_____________________________________________________________\n");
+
+    printf("File content:\n");
+    read_file(fd);
+
     close(fd);
     closedir(director);
 }

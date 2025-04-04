@@ -1,6 +1,5 @@
 #ifndef PART1_H
 #define PART1_H
-
 #include<stdio.h>
 
 typedef struct treasure{
@@ -13,6 +12,8 @@ typedef struct treasure{
 
 treasure  *new_treasure();
 
-void add();
+void add(char hunt[10]);
+
+void list(char hunt[10]);
 
 #endif
