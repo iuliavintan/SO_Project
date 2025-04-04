@@ -11,6 +11,8 @@ typedef struct treasure{
     int value;
 }treasure;
 
+treasure  *new_treasure();
+
 void add();
 
 #endif
