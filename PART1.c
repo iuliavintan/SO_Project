@@ -5,6 +5,7 @@
 #include<dirent.h>
 #include<stdlib.h>
 #include<string.h>
+#include<fcntl.h>
 #include"PART1.h"
 
 treasure *new_treasure()
@@ -62,5 +63,19 @@ void add(char hunt[10])
         }
     }
     
+    char path[50];
+    strcpy(path, hunt);
+    strcat(path, "/game.txt");
+
+    int fd=open(path, O_CREAT | O_WRONLY | O_APPEND, 0777);
+
+    if(fd==-1)
+    {
+        perror("Failed to open treasure file!:(");
+        exit(-1);
+    }
+
+
+    close(fd);
     closedir(director);
 }
