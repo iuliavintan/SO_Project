@@ -16,4 +16,6 @@ void add(char hunt[10]);
 
 void list(char hunt[10]);
 
+void view(char hunt[10], int id);
+
 #endif

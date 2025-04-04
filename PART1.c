@@ -79,21 +79,30 @@ void add(char hunt[10])
 
     treasure *comoara=new_treasure();
 
-    int buf_size=snprintf(NULL, 0, "%d, %s, %f, %f, %s, %d\n", comoara->id, comoara->name, comoara->longitude, comoara->latitude, comoara->clue, comoara->value);
+    // int buf_size=snprintf(NULL, 0, "%d, %s, %f, %f, %s, %d\n", comoara->id, comoara->name, comoara->longitude, comoara->latitude, comoara->clue, comoara->value);
 
-    char *buf=malloc(buf_size+1);
-    if(buf==NULL)
-    {
-        perror("Eroare! Memorie insuficienta!:(");
-        exit(-1);
-    }
+    // char *buf=malloc(buf_size+1);
+    // if(buf==NULL)
+    // {
+    //     perror("Eroare! Memorie insuficienta!:(");
+    //     exit(-1);
+    // }
 
-    sprintf(buf, "%d, %s, %f, %f, %s, %d\n", comoara->id, comoara->name, comoara->longitude, comoara->latitude, comoara->clue, comoara->value);
+    // sprintf(buf, "%d, %s, %f, %f, %s, %d\n", comoara->id, comoara->name, comoara->longitude, comoara->latitude, comoara->clue, comoara->value);
     
-    if(write(fd, buf, strlen(buf))==-1)
+
+    // if(write(fd, buf, strlen(buf))==-1)
+    // {
+    //     perror("Unable to add new treasure:(");
+    //     free(buf);
+    //     close(fd);
+    //     exit(-1);
+    // }
+
+    if(write(fd, comoara, sizeof(treasure))==-1)
     {
         perror("Unable to add new treasure:(");
-        free(buf);
+        free(comoara);
         close(fd);
         exit(-1);
     }
@@ -103,18 +112,25 @@ void add(char hunt[10])
         printf("New treasure added succesfully!\n");
     }
     
-    free(buf);
+    free(comoara);
     close(fd);
     closedir(director);
 }
 
 void read_file(int f)
 {
-
-	char buffer[4096];
-	while(read(f,buffer,sizeof(buffer)))
-	{
-		write(1, buffer, strlen(buffer));
+    treasure *comoara=malloc(sizeof(treasure));
+    int nr=0;
+    while(read(f, comoara, sizeof(treasure)))
+    {
+        printf("Treasure %d\n", nr++);
+        printf("ID: %d\n", comoara->id);
+        printf("Name: %s\n", comoara->name);
+        printf("GPS longitude: %f\n", comoara->longitude);
+        printf("GPS latitude: %f\n", comoara->latitude);
+        printf("Clue: %s\n", comoara->clue);
+        printf("Value: %d\n", comoara->value);
+       // printf("%d %s %f %f %s %d\n", , comoara->name, comoara->longitude, comoara->latitude, comoara->clue, comoara->value);
     }
 }
 
@@ -160,5 +176,21 @@ void list(char hunt[10])
     read_file(fd);
 
     close(fd);
+    closedir(director);
+}
+
+void view(char hunt[10], int id)
+{
+    DIR *director;
+    
+    director=opendir(hunt);
+
+    if(director==NULL)
+    {
+        printf("The hunt you provided doesn't exist!\n");
+        exit(-1);
+    }
+    
+
     closedir(director);
 }
