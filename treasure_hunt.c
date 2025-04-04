@@ -1,16 +1,28 @@
 #include<stdio.h>
 #include<stdlib.h>
+#include<string.h>
 #include"PART1.h"
 
-int main(void)
+int main(int argc, char *argv[])
 {
-    //add("hunt1");
-    treasure *comoara;
-    comoara=new_treasure();
-
-    printf("%d, %s, %f, %f, %s, %d\n", comoara->id, comoara->name, comoara->longitude, comoara->latitude, comoara->clue, comoara->value);
-
-    free(comoara);
+    
+    if(argc == 3)
+    {
+        if(strcmp(argv[1], "--add")==0)
+        {
+            add(argv[2]);
+        }
+        else
+        {
+            printf("Another option with 3 arguments!\n");
+        }
+    }
+    else
+    {
+        perror("Wrong number of arguments for --add option!\n");
+        exit(-1);
+    }
+    
     return 0;
 
 }

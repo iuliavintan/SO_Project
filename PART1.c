@@ -6,6 +6,7 @@
 #include<stdlib.h>
 #include<string.h>
 #include<fcntl.h>
+#include<unistd.h>
 #include"PART1.h"
 
 treasure *new_treasure()
@@ -75,7 +76,20 @@ void add(char hunt[10])
         exit(-1);
     }
 
+    treasure *comoara=new_treasure();
 
+    int buf_size=snprintf(NULL, 0, "%d, %s, %f, %f, %s, %d\n", comoara->id, comoara->name, comoara->longitude, comoara->latitude, comoara->clue, comoara->value);
+
+    char *buf=malloc(buf_size+1);
+    if(buf==NULL)
+    {
+        perror("Eroare! Memorie insuficienta!:(");
+        exit(-1);
+    }
+
+    sprintf(buf, "%d, %s, %f, %f, %s, %d\n", comoara->id, comoara->name, comoara->longitude, comoara->latitude, comoara->clue, comoara->value);
+    write(fd, buf, strlen(buf));
+    free(buf);
     close(fd);
     closedir(director);
 }
