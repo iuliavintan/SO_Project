@@ -16,6 +16,7 @@ treasure *new_treasure()
     if(comoara==NULL)
     {
         perror("Error! Insuficient memory creating new treasure:(");
+        free(comoara);
         exit(-1);
     }
 
@@ -79,26 +80,6 @@ void add(char hunt[10])
 
     treasure *comoara=new_treasure();
 
-    // int buf_size=snprintf(NULL, 0, "%d, %s, %f, %f, %s, %d\n", comoara->id, comoara->name, comoara->longitude, comoara->latitude, comoara->clue, comoara->value);
-
-    // char *buf=malloc(buf_size+1);
-    // if(buf==NULL)
-    // {
-    //     perror("Eroare! Memorie insuficienta!:(");
-    //     exit(-1);
-    // }
-
-    // sprintf(buf, "%d, %s, %f, %f, %s, %d\n", comoara->id, comoara->name, comoara->longitude, comoara->latitude, comoara->clue, comoara->value);
-    
-
-    // if(write(fd, buf, strlen(buf))==-1)
-    // {
-    //     perror("Unable to add new treasure:(");
-    //     free(buf);
-    //     close(fd);
-    //     exit(-1);
-    // }
-
     if(write(fd, comoara, sizeof(treasure))==-1)
     {
         perror("Unable to add new treasure:(");
@@ -117,21 +98,36 @@ void add(char hunt[10])
     closedir(director);
 }
 
-void read_file(int f)
+void print_treasure(treasure *comoara)
+{
+    
+    printf("ID: %d\n", comoara->id);
+    printf("Name: %s\n", comoara->name);
+    printf("GPS longitude: %f\n", comoara->longitude);
+    printf("GPS latitude: %f\n", comoara->latitude);
+    printf("Clue: %s\n", comoara->clue);
+    printf("Value: %d\n", comoara->value);
+}
+
+void read_and_print_file(int f)
 {
     treasure *comoara=malloc(sizeof(treasure));
-    int nr=0;
+    if(comoara==NULL)
+    {
+        perror("Error! Insuficient memory creating new treasure:(");
+        free(comoara);
+        exit(-1);
+    }
+
+    int nr=1;
     while(read(f, comoara, sizeof(treasure)))
     {
         printf("Treasure %d\n", nr++);
-        printf("ID: %d\n", comoara->id);
-        printf("Name: %s\n", comoara->name);
-        printf("GPS longitude: %f\n", comoara->longitude);
-        printf("GPS latitude: %f\n", comoara->latitude);
-        printf("Clue: %s\n", comoara->clue);
-        printf("Value: %d\n", comoara->value);
+        print_treasure(comoara);
+        printf("..........................................\n");
        // printf("%d %s %f %f %s %d\n", , comoara->name, comoara->longitude, comoara->latitude, comoara->clue, comoara->value);
     }
+    free(comoara);
 }
 
 void list(char hunt[10])
@@ -172,8 +168,8 @@ void list(char hunt[10])
     printf("Last modification made: %s", ctime(&fisi_stat.st_atim.tv_sec));
     printf("_____________________________________________________________\n");
 
-    printf("File content:\n");
-    read_file(fd);
+    printf("File content:\n\n");
+    read_and_print_file(fd);
 
     close(fd);
     closedir(director);
@@ -191,6 +187,46 @@ void view(char hunt[10], int id)
         exit(-1);
     }
     
+    char path[50];
+    strcpy(path, hunt);
+    strcat(path, "/game.txt");
 
+    int fd=open(path, O_RDONLY, 0777);
+    if(fd==-1)
+    {
+        perror("Failed to open treasure file!:(");
+        exit(-1);
+    }
+
+    treasure *buff=malloc(sizeof(treasure));
+    if(buff==NULL)
+    {
+        perror("Error! Insuficient memory creating new treasure:(");
+        free(buff);
+        close(fd);
+        closedir(director);
+        exit(-1);
+    }
+    
+    int found=0;
+
+    while(read(fd, buff, sizeof(treasure)))
+    {
+        if(buff->id==id)
+        {
+            printf("Treasure found!\n");
+            print_treasure(buff);
+            found=1;
+            break;
+        }
+    }
+
+    if(found==0)
+    {
+        printf("There aren't any treasures matching ID%d\n", id);
+    }
+
+    free(buff);
+    close(fd);
     closedir(director);
 }
