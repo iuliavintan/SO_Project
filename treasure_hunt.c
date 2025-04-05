@@ -6,15 +6,18 @@
 int main(int argc, char *argv[])
 {
     
+    char log_path[1024];
+    snprintf(log_path, sizeof(log_path), "%s/logged_hunt.txt", argv[2] ); // se creaza path ul catre log 
+
     if(argc == 3)
     {
         if(strcmp(argv[1], "--add")==0)
         {
-            add(argv[2]);
+            add(argv[2], log_path);
         }
         else if(strcmp(argv[1], "--list")==0)
         {
-            list(argv[2]);
+            list(argv[2], log_path);
         }
         else
         {
@@ -27,7 +30,6 @@ int main(int argc, char *argv[])
         {
             int id = atoi(argv[3]);
             view(argv[2], id);
-            //view(argv[2], (int)(*argv[3]));
         }
         else
         {

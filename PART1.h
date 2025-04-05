@@ -12,10 +12,12 @@ typedef struct treasure{
 
 treasure  *new_treasure();
 
-void add(char hunt[10]);
+void add(char hunt[10], char log_path[1024]);
 
-void list(char hunt[10]);
+void list(char hunt[10], char log_path[1024]);
 
 void view(char hunt[10], int id);
+
+void remove_treasure(char hunt[10], int id);
 
 #endif
