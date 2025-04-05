@@ -10,6 +10,9 @@
 #include<time.h>
 #include"PART1.h"
 
+
+//add info to variable
+
 treasure *new_treasure()
 {
     treasure *comoara=malloc(sizeof(treasure));
@@ -46,6 +49,8 @@ treasure *new_treasure()
 
     return comoara;
 }
+
+//Add the new treasure to a specified hunt - each hunt is stored in a separate directory.
 
 void add(char hunt[10])
 {
@@ -109,6 +114,7 @@ void print_treasure(treasure *comoara)
     printf("Value: %d\n", comoara->value);
 }
 
+//parsing the file line by line to extract each treasure info
 void read_and_print_file(int f)
 {
     treasure *comoara=malloc(sizeof(treasure));
@@ -125,11 +131,13 @@ void read_and_print_file(int f)
         printf("Treasure %d\n", nr++);
         print_treasure(comoara);
         printf("..........................................\n");
-       // printf("%d %s %f %f %s %d\n", , comoara->name, comoara->longitude, comoara->latitude, comoara->clue, comoara->value);
     }
     free(comoara);
 }
 
+
+//listing all treasures from a specific hunt
+//providing info about directory: hunt name, file size in bytes, the time of the last modification
 void list(char hunt[10])
 {
     DIR *director;
@@ -175,6 +183,9 @@ void list(char hunt[10])
     closedir(director);
 }
 
+
+//printing the details about a specific treasure from a given hunt 
+//searched by ID
 void view(char hunt[10], int id)
 {
     DIR *director;
