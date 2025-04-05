@@ -133,7 +133,7 @@ void add(char hunt[10], char log_path[1024])
     
     char symlink_path[100];
 
-    sprintf(symlink_path, "%s/logged_hunt-%s", hunt, hunt);
+    sprintf(symlink_path, "logged_hunt-%s", hunt);
 
     struct stat st;
 
@@ -296,11 +296,16 @@ void view(char hunt[10], int id)
             break;
         }
     }
-
+    
+    //char message[1000];
+    
     if(found==0)
     {
         printf("There aren't any treasures matching ID%d\n", id);
     }
+
+    
+    
 
     free(buff);
     close(fd);
