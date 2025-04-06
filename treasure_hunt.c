@@ -19,6 +19,10 @@ int main(int argc, char *argv[])
         {
             list(argv[2], log_path);
         }
+        else if(strcmp(argv[1], "--remove_hunt")==0)
+        {
+            remove_hunt(argv[2], log_path);
+        }
         else
         {
             printf("Another option with 3 arguments!\n");
@@ -38,12 +42,12 @@ int main(int argc, char *argv[])
         }
         else
         {
-            printf("Another option with 4 arguments!\n");
+            printf("Wrong arguments!\n Try again\n");
         }
     }
     else
     {
-        perror("Wrong number of arguments for --add option!\n");
+        perror("Wrong number of arguments! Try again\n");
         exit(-1);
     }
     

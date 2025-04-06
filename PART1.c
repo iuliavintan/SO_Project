@@ -393,3 +393,71 @@ void remove_treasure(char hunt[10], int id, char log_path[1024])
 
     closedir(director);
 }
+
+void remove_hunt(char hunt[10], char log_path[1024])
+{
+    printf("Are you sure you want to delete hunt \"%s\"? (y/n): ", hunt);
+    char confirm = getchar();
+    
+    if (confirm != 'y' && confirm != 'Y') 
+    {
+        printf("Deletion canceled.\n");
+        return;
+    }
+    
+    
+    DIR *director;
+    
+    director=opendir(hunt);
+    if(director==NULL)
+    {
+        perror("The hunt you provided doesn't exist!\n");   
+    }
+
+    char path[50];
+    sprintf(path, "%s/game.txt", hunt);
+
+    char symlink_path[100];
+    sprintf(symlink_path, "logged_hunt-%s", hunt);
+
+    if(remove(path)==0)
+    {
+        printf("%s deleted sucessfully\n", path);
+    }
+    else
+    {
+        perror("Failed to remove game.txt\n");
+    }
+
+    if(unlink(symlink_path)==0)
+    {
+        printf("Symbolic link removed succesfully\n");
+    }
+    else
+    {
+        perror("Failed to remove symbolic link\n");
+    }
+
+    if(remove(log_path)==0)
+    {
+        printf("Log file removed succesfully\n");
+    }
+    else
+    {
+        perror("Failed to remove log file");
+    }
+
+    if(rmdir(hunt)==0)
+    {
+        printf("%s directory removed succesfully\n", hunt);
+    }
+    else
+    {
+        perror("Failed to remove directory");
+    }
+
+
+
+
+    closedir(director);
+}

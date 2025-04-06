@@ -20,4 +20,6 @@ void view(char hunt[10], int id, char log_path[1024]);
 
 void remove_treasure(char hunt[10], int id, char log_path[1024]);
 
+void remove_hunt(char hunt[10], char log_path[1024]);
+
 #endif
