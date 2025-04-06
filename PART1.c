@@ -211,8 +211,7 @@ void list(char hunt[10], char log_path[1024])
     struct stat fisi_stat;
 
     char path[50];
-    strcpy(path, hunt);
-    strcat(path, "/game.txt");
+    sprintf(path, "%s/game.txt", hunt);
 
     int fd=open(path, O_RDONLY, 0777);
 
@@ -238,7 +237,7 @@ void list(char hunt[10], char log_path[1024])
     printf("File content:\n\n");
     read_and_print_file(fd);
 
-    char message[200];
+    char message[150];
     sprintf(message, "Listed %s", hunt);
 
     log_action(message, log_path);
@@ -251,7 +250,7 @@ void list(char hunt[10], char log_path[1024])
 
 //printing the details about a specific treasure from a given hunt 
 //searched by ID
-void view(char hunt[10], int id)
+void view(char hunt[10], int id, char log_path[1024])
 {
     DIR *director;
     
@@ -264,8 +263,7 @@ void view(char hunt[10], int id)
     }
     
     char path[50];
-    strcpy(path, hunt);
-    strcat(path, "/game.txt");
+    sprintf(path, "%s/game.txt", hunt);
 
     int fd=open(path, O_RDONLY, 0777);
     if(fd==-1)
@@ -297,14 +295,19 @@ void view(char hunt[10], int id)
         }
     }
     
-    //char message[1000];
-    
+    char message[150];
+
     if(found==0)
     {
         printf("There aren't any treasures matching ID%d\n", id);
+        sprintf(message, "Tried to view treasure with ID%d. Doesn't exist!", id);
+    }
+    else
+    {
+        sprintf(message, "Viewed treasure with ID%d.", id);
     }
 
-    
+    log_action(message, log_path);
     
 
     free(buff);
@@ -312,7 +315,7 @@ void view(char hunt[10], int id)
     closedir(director);
 }
 
-void remove_treasure(char hunt[10], int id)
+void remove_treasure(char hunt[10], int id, char log_path[1024])
 {
     DIR *director;
 
@@ -325,18 +328,68 @@ void remove_treasure(char hunt[10], int id)
     }
 
     char path[50];
-    strcpy(path, hunt);
-    strcat(path, "/game.txt");
+    sprintf(path, "%s/game.txt", hunt);
+    char temp_path[50];         //created temporary file to write the treasures we dont't want to delete
+    sprintf(temp_path, "%s/temp.txt", hunt);
 
-    int fd=open(path, O_RDWR, 0777);
-    if(fd==-1)
+    int fd_read=open(path, O_RDONLY, 0777);
+    if(fd_read==-1)
     {
         perror("Failed to open treasure file!:(");
+        closedir(director);
         exit(-1);
     }
 
+    int fd_write=open(temp_path, O_CREAT | O_APPEND | O_WRONLY, 0777);
+    if(fd_write==-1)
+    {
+        perror("Failed to open writing file!");
+        closedir(director);
+        exit(-1);
+    }
 
+    treasure *buff=malloc(sizeof(treasure));
+    if(buff==NULL)
+    {
+        perror("Error! Insufficient memory!");
+        close(fd_read);
+        close(fd_write);
+        closedir(director);
+        exit(-1);
+    }
+    int found=0;
+    while(read(fd_read, buff, sizeof(treasure)))
+    {
+        if(buff->id!=id)
+        {
+            write(fd_write, buff, sizeof(treasure));
+        }
+        else
+        {
+            found=1;
+        }
+    }
+    close(fd_read);
+    close(fd_write);
+    free(buff);
+    char message[200];
+   
 
-    close(fd);
+    if(found==0)
+    {
+        remove(temp_path); //we didn't find any treasure matching the ID => we remove the temporary file
+        printf("No treasure matching ID%d\n", id);
+        sprintf(message, "Tried to remove treasure ID%d", id);
+    }
+    else
+    {
+        remove(path);
+        rename(temp_path, path);
+        printf("Treasure with ID%d removed succesfully!\n", id);
+        sprintf(message, "Removed treasure ID%d", id);
+    }
+
+    log_action(message, log_path);
+
     closedir(director);
 }

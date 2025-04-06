@@ -29,7 +29,12 @@ int main(int argc, char *argv[])
         if(strcmp(argv[1], "--view")==0)
         {
             int id = atoi(argv[3]);
-            view(argv[2], id);
+            view(argv[2], id, log_path);
+        }
+        else if(strcmp(argv[1], "--remove_treasure")==0)
+        {
+            int id=atoi(argv[3]);
+            remove_treasure(argv[2], id, log_path);
         }
         else
         {
