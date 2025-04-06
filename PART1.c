@@ -362,7 +362,7 @@ void remove_treasure(char hunt[10], int id, char log_path[1024])
     {
         if(buff->id!=id)
         {
-            write(fd_write, buff, sizeof(treasure));
+            write(fd_write, buff, sizeof(treasure));   //writes in the temporary file all the treasures we don't want to remove
         }
         else
         {
@@ -377,14 +377,14 @@ void remove_treasure(char hunt[10], int id, char log_path[1024])
 
     if(found==0)
     {
-        remove(temp_path); //we didn't find any treasure matching the ID => we remove the temporary file
+        remove(temp_path); //if no treasure matching the ID found => we don't need the temporary file
         printf("No treasure matching ID%d\n", id);
         sprintf(message, "Tried to remove treasure ID%d", id);
     }
     else
     {
-        remove(path);
-        rename(temp_path, path);
+        remove(path);   //removes the original file with the treasure we want to remove
+        rename(temp_path, path);     //renames the temporary file as game.txt
         printf("Treasure with ID%d removed succesfully!\n", id);
         sprintf(message, "Removed treasure ID%d", id);
     }
@@ -420,7 +420,7 @@ void remove_hunt(char hunt[10], char log_path[1024])
     char symlink_path[100];
     sprintf(symlink_path, "logged_hunt-%s", hunt);
 
-    if(remove(path)==0)
+    if(remove(path)==0)                                 //remove the game.txt file
     {
         printf("%s deleted sucessfully\n", path);
     }
@@ -429,7 +429,7 @@ void remove_hunt(char hunt[10], char log_path[1024])
         perror("Failed to remove game.txt\n");
     }
 
-    if(unlink(symlink_path)==0)
+    if(unlink(symlink_path)==0)                         //unlinks the symbolic link to the log file
     {
         printf("Symbolic link removed succesfully\n");
     }
@@ -438,7 +438,7 @@ void remove_hunt(char hunt[10], char log_path[1024])
         perror("Failed to remove symbolic link\n");
     }
 
-    if(remove(log_path)==0)
+    if(remove(log_path)==0)                             //removes the log file
     {
         printf("Log file removed succesfully\n");
     }
@@ -447,7 +447,7 @@ void remove_hunt(char hunt[10], char log_path[1024])
         perror("Failed to remove log file");
     }
 
-    if(rmdir(hunt)==0)
+    if(rmdir(hunt)==0)                                  //finally removes the whole directory
     {
         printf("%s directory removed succesfully\n", hunt);
     }
@@ -455,8 +455,6 @@ void remove_hunt(char hunt[10], char log_path[1024])
     {
         perror("Failed to remove directory");
     }
-
-
 
 
     closedir(director);
