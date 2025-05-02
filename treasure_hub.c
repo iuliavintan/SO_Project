@@ -2,13 +2,37 @@
 #include <stdlib.h>
 #include <string.h>
 #include <unistd.h>
+#include<signal.h>
+#include"PART2.h"
+
+void handle_sigchld(int s)
+{
+    if(monitor_stopped)
+    {
+        monitor_pid=-1;
+        printf("Monitor stopped\n");
+
+        monitor_stopped=0;
+    }
+}
 
 int main(void){
     char cmd[101];
 
+    struct sigaction sigchld;
+    sigchld.sa_handler=handle_sigchld;
+    sigchld.sa_flags=0;
+    sigemptyset(&sigchld.sa_mask);
+
+    if((sigaction(SIGCHLD, &sigchld, NULL))==-1)
+    {
+        perror("Error sigaction");
+        exit(-1);   
+    }
+
+
     while(1){
         printf(">> ");
-        fflush(stdout);
         
         if(fgets(cmd, sizeof(cmd), stdin) == NULL ){
             break;
@@ -17,33 +41,61 @@ int main(void){
         cmd[strcspn(cmd, "\n")] = 0;
 
         if(strcmp(cmd, "start_monitor") == 0){
-            // printf("start monitor proc\n");
-
-            int pid = fork();
-
-            if(pid == 0 ){
-                exec()
-            }
+            
+            start_monitor();
 
         }
         else if(strcmp(cmd, "list_hunts") == 0){
+            
             printf("list hunts\n");
+        
         }
         else if(strcmp(cmd,"list_treasures") == 0){
-            printf("trsr\n");
+        
+            if(monitor_running)
+            {
+                view_treasure();
+            }
+            else
+            {
+                printf("Error! Monitor not running!\nTry \"start_running\" command\n");
+            }
+        
         }
         else if(strcmp(cmd, "view_treasure") == 0){
-            printf("viewtrs\n");
+        
+            if(monitor_running)
+            {
+                view_treasure();
+            }
+            else
+            {
+                printf("Error! Monitor not running!\nTry \"start_running\" command\n");
+            }
+        
         }
         else if(strcmp(cmd, "stop_monitor") == 0){
-            printf("stopmnt\n");
+        
+            stop_monitor();
+            monitor_running=0;
+        
         }
         else if(strcmp(cmd, "exit") == 0){
-            printf("se exituie\n");
-            break;
+        
+            if(monitor_running)
+            {
+                printf("Cannot exit without stopping monitor!\nTry command \"stop_monitor\"\n");
+            }
+            else
+            {
+                exit(0);
+            }
+        
         }
         else{
+           
             printf("Unknown command\n");
+        
         }
     }
     return 0;
