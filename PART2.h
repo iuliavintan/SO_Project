@@ -6,6 +6,7 @@
 
 #define VIEW_TREASURE SIGUSR1
 #define LIST_TREASURES SIGUSR1
+#define LIST_HUNTS SIGUSR1
 
 
 extern int monitor_pid;
@@ -19,6 +20,8 @@ void start_monitor();
 void view_treasure();
 
 void list_treasures();
+
+void list_hunts_wrap();
 
 void stop_monitor();
 

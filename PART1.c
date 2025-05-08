@@ -459,3 +459,57 @@ void remove_hunt(char hunt[10], char log_path[1024])
 
     closedir(director);
 }
+
+
+//added for phase 2
+int getNoTreasures(char hunt[10])
+{
+    DIR *director;
+    director=opendir(hunt);
+
+    if(director==NULL)
+    {
+        printf("Pusca aici!\n");
+        exit(-1);
+    }
+
+    char path[50];
+    sprintf(path, "%s/game.txt", hunt);
+
+    int fd=open(path, O_RDONLY, 0777);
+
+    int count=0;
+
+    treasure t;
+
+    while( read(fd,&t,sizeof(treasure))) count++;
+
+    close(fd);
+
+    return count;
+}
+
+void list_hunts()
+{
+    struct dirent *file;
+    const char *dir_path="./"; //root directory
+
+    DIR *director=opendir(dir_path);
+
+    if(director==NULL)
+    {
+        perror("Error opending root directory");
+        exit(-1);
+    }
+
+    while( (file=readdir(director)) != NULL)
+    {
+        if( strcmp(file->d_name, ".")==0 || strcmp(file->d_name, "..")==0 )
+            continue;
+
+        if(file->d_type == DT_DIR && (strcmp(file->d_name, ".git"))!=0)
+        {
+            printf("%s: %d treasures\n", file->d_name, getNoTreasures(file->d_name));
+        }
+    }
+}

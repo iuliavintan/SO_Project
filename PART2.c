@@ -20,7 +20,7 @@ void write_command(char *message)
     char path[50];
     sprintf(path, "cmd_file");
 
-    int fd = open(path, O_CREAT | O_WRONLY, 0777);
+    int fd = open(path, O_CREAT | O_WRONLY | O_TRUNC, 0777);
     if(fd == -1)
     {
         perror("Error opening cmd_file");
@@ -78,6 +78,10 @@ void handle_sigusr1(int sig_type)
             exit(1);
         }
     }
+    else if((strstr(command, "--list_hunts"))!=0)
+    {
+        list_hunts();
+    }
     else if((strstr(command, "--list"))!=0)
     {
         char hunt[30];
@@ -101,7 +105,7 @@ void handle_sigusr1(int sig_type)
             exit(1);
         }
     }
-
+    
     close(fd);
 }
 
@@ -182,6 +186,14 @@ void list_treasures()
     kill(monitor_pid, LIST_TREASURES);
 }
 
+void list_hunts_wrap()
+{
+    char message[101];
+    sprintf(message, "%s", "--list_hunts");
+    write_command(message);
+    kill(monitor_pid, LIST_HUNTS);
+}
+
 void stop_monitor()
 {
     printf("Monitor is stopping...\n");
@@ -197,7 +209,7 @@ void stop_monitor()
       char command[30];
       if(scanf("%s", command) == 1)
 	{
-	  printf("Illegal action <%s> while monitor is stoppping!\n", command);
+	  printf("Unable to perform <%s> action while monitor is stoppping!\n", command);
 	}      
     }
 

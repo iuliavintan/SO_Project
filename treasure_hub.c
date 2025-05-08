@@ -47,14 +47,21 @@ int main(void){
         }
         else if(strcmp(cmd, "list_hunts") == 0){
             
-            printf("list hunts\n");
+            if(monitor_running)
+            {
+                list_hunts_wrap();
+            }
+            else
+            {
+                printf("Error! Monitor not running!\nTry \"start_running\" command\n");
+            }
         
         }
         else if(strcmp(cmd,"list_treasures") == 0){
         
             if(monitor_running)
             {
-                view_treasure();
+                list_treasures();
             }
             else
             {
