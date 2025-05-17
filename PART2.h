@@ -12,6 +12,11 @@
 extern int monitor_pid;
 extern int monitor_running;
 extern int monitor_stopped;
+extern int pfd_list_hunts[2];
+extern int pfd_list_treasures[2];
+extern int pfd_view[2];
+
+void read_from_pipe(int pfd[2]);
 
 void monitor();
 

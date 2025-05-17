@@ -4,7 +4,6 @@
 #include <unistd.h>
 #include<signal.h>
 #include"PART2.h"
-#include"PART3.h"
 
 void handle_sigchld(int s)
 {
@@ -34,6 +33,7 @@ int main(void){
 
     while(1){
         printf(">> ");
+        fflush(stdout);
         
         if(fgets(cmd, sizeof(cmd), stdin) == NULL ){
             break;
@@ -51,6 +51,9 @@ int main(void){
             if(monitor_running)
             {
                 list_hunts_wrap();
+
+               // usleep(100000);
+                read_from_pipe(pfd_list_hunts);
             }
             else
             {
@@ -63,6 +66,9 @@ int main(void){
             if(monitor_running)
             {
                 list_treasures();
+
+               // usleep(100000);
+                read_from_pipe(pfd_list_treasures);
             }
             else
             {
@@ -75,6 +81,10 @@ int main(void){
             if(monitor_running)
             {
                 view_treasure();
+
+                //usleep(100000);
+                read_from_pipe(pfd_view);
+
             }
             else
             {
@@ -105,7 +115,6 @@ int main(void){
             printf("Username:");
             scanf("%s", username);
             getchar();
-
             calculate_score_wrap(username);
         }
         else{

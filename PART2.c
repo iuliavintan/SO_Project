@@ -14,6 +14,46 @@
 int monitor_pid=-1;
 int monitor_running =0;
 int monitor_stopped=0;
+int pfd_list_hunts[2];
+int pfd_list_treasures[2];
+int pfd_view[2];
+
+void read_from_pipe( int pfd[2]) {
+
+  char buffer[2048] = {0};
+
+  // close writing end of pipe
+  close(pfd[1]);
+
+  // a copy of reading file
+  int read_fd = dup(pfd[0]);
+  if (read_fd < 0) {
+      perror("dup failed");
+      return;
+  }
+
+  FILE *stream = fdopen(read_fd, "r");
+  
+  if (!stream) {
+      perror("Fdopen failed");
+      close(read_fd);
+      return;
+  }
+
+  while (fgets(buffer, sizeof(buffer), stream)) {
+      printf("%s", buffer);
+  }
+
+  fclose(stream); // closing only the copy
+}
+
+void write_in_pipe(int pfd[2])
+{
+  close(pfd[0]);          // close reading end
+  dup2(pfd[1], 1);        // redirecting writing end to stdout
+  close(pfd[1]);          // close writing end
+}
+
 
 void write_command(char *message)
 {
@@ -63,24 +103,31 @@ void handle_sigusr1(int sig_type)
         snprintf(log_path, sizeof(log_path), "%s/logged_hunt.txt", hunt);
 
         pid_t pid_view=fork();
-
+        write_in_pipe(pfd_view);
+        
         if(pid_view<0)
         {
             perror("Error opening view process!");
             exit(-1);
         }
 
-
         if(pid_view==0)
-        {
+        {  
             if((execlp("./treasure_manager", "treasure_manager", "--view", hunt, id, NULL))==-1)
             perror("Error execlp");
             exit(1);
         }
+        else
+        {
+            wait(NULL);
+        }
+        close(STDOUT_FILENO);
     }
     else if((strstr(command, "--list_hunts"))!=0)
     {
+        write_in_pipe(pfd_list_hunts);
         list_hunts();
+        close(STDOUT_FILENO);
     }
     else if((strstr(command, "--list"))!=0)
     {
@@ -92,7 +139,7 @@ void handle_sigusr1(int sig_type)
         snprintf(log_path, sizeof(log_path), "%s/logged_hunt.txt", hunt);
 
         pid_t pid_list=fork();
-
+        write_in_pipe(pfd_list_treasures);
         if(pid_list<0)
         {
             perror("Error opening list process!");
@@ -100,10 +147,15 @@ void handle_sigusr1(int sig_type)
         }
         if(pid_list==0)
         {
+           
             execlp("./treasure_manager", "treasure_manager", "--list", hunt, NULL);
-
             exit(1);
         }
+        else
+        {
+            wait(NULL);
+        }
+        close(STDOUT_FILENO);
     }
     
     close(fd);
@@ -125,32 +177,62 @@ void monitor()
     while(1)
     {
         pause();
+
+       
     }
 
     exit(0);
 }
 
+
 void start_monitor()
 {
 
-    if((monitor_pid=fork())<0)
+    if(monitor_running)
     {
-        perror("Error opening monitor process!");
-        exit(-1);
+      printf("Monitor already running.\n");
     }
+     else
+    {
+      //create pipes
+        if(pipe(pfd_list_hunts) < 0)
+        {
+            perror("Pipe error");
+            exit(-1);
+        }
 
-    if(monitor_pid==0)
-    {
-        monitor_running=1;
-        monitor();
-        exit(0);
-    }
-    else
-    {
-        monitor_running=1;
-        printf("Monitor started with PID %d\n", monitor_pid);
-    }
+        if(pipe(pfd_list_treasures) < 0)
+        {
+            perror("Pipe error");
+            exit(-1);
+        }
 
+        if(pipe(pfd_view) < 0)
+        {
+            perror("Pipe error");
+            exit(-1);
+        }
+        
+
+        if((monitor_pid=fork())<0)
+        {
+            perror("Error opening monitor process!");
+            exit(-1);
+        }
+
+        if(monitor_pid==0)
+        {
+            monitor_running=1;
+            monitor();
+            exit(0);
+        }
+        else
+        {
+            monitor_running=1;
+            printf("Monitor started with PID %d\n", monitor_pid);
+        }
+
+    }
 }
 
 void view_treasure()
@@ -171,6 +253,8 @@ void view_treasure()
     write_command(message);
 
     kill(monitor_pid,  VIEW_TREASURE);
+   
+
 }
 
 void list_treasures()
@@ -184,6 +268,7 @@ void list_treasures()
     sprintf(message, "%s %s", "--list", hunt);
     write_command(message);
     kill(monitor_pid, LIST_TREASURES);
+  
 }
 
 void list_hunts_wrap()
@@ -192,6 +277,7 @@ void list_hunts_wrap()
     sprintf(message, "%s", "--list_hunts");
     write_command(message);
     kill(monitor_pid, LIST_HUNTS);
+   
 }
 
 void calculate_score_wrap(char username[50])
@@ -209,7 +295,7 @@ void calculate_score_wrap(char username[50])
     {
         //child process
         close(pfd[0]);
-        //dup2(pfd[1], 1); //redirecting to stdout
+        dup2(pfd[1], 1); //redirecting to stdout
         execl("./calculate_score", "calculate_score", username, NULL);
         perror("Execl failed");
         exit(-1);
@@ -225,13 +311,12 @@ void calculate_score_wrap(char username[50])
         close(pfd[0]);
         wait(NULL);
     }
-    
 }
 
 void stop_monitor()
 {
     printf("Monitor is stopping...\n");
-    usleep(10000000);
+    usleep(1000000);
 
     kill(monitor_pid, SIGTERM);
 
@@ -267,6 +352,5 @@ void stop_monitor()
     {
       printf("Monitor stopped abnormally.\n");
     }
-
-
 }
+
