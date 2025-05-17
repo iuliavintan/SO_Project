@@ -4,6 +4,7 @@
 #include <unistd.h>
 #include<signal.h>
 #include"PART2.h"
+#include"PART3.h"
 
 void handle_sigchld(int s)
 {
@@ -97,7 +98,21 @@ int main(void){
             {
                 exit(0);
             }
-        
+        }
+        else if(strcmp(cmd, "calculate_score")==0)
+        {
+            char hunt[10];
+            printf("Hunt:");
+            scanf("%s", hunt);
+            getchar();
+            char username[50];
+            printf("Username:");
+            scanf("%s", username);
+            getchar();
+            int score=calculate_score(hunt, username);
+            printf("User %s has a score of %d!\n", username, score);
+
+            
         }
         else{
            
