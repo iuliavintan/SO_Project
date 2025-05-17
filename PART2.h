@@ -25,4 +25,6 @@ void list_hunts_wrap();
 
 void stop_monitor();
 
+void calculate_score_wrap(char username[50]);
+
 #endif

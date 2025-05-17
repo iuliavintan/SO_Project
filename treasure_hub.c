@@ -101,18 +101,12 @@ int main(void){
         }
         else if(strcmp(cmd, "calculate_score")==0)
         {
-            char hunt[10];
-            printf("Hunt:");
-            scanf("%s", hunt);
-            getchar();
             char username[50];
             printf("Username:");
             scanf("%s", username);
             getchar();
-            int score=calculate_score(hunt, username);
-            printf("User %s has a score of %d!\n", username, score);
 
-            
+            calculate_score_wrap(username);
         }
         else{
            

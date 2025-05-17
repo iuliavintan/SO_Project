@@ -194,6 +194,40 @@ void list_hunts_wrap()
     kill(monitor_pid, LIST_HUNTS);
 }
 
+void calculate_score_wrap(char username[50])
+{
+    int pfd[2];
+
+    if(pipe(pfd)==-1)
+    {
+        perror("Error creating pipe for calculation score");
+        exit(-1);
+    }
+
+    pid_t pid=fork();
+    if(pid==0)
+    {
+        //child process
+        close(pfd[0]);
+        //dup2(pfd[1], 1); //redirecting to stdout
+        execl("./calculate_score", "calculate_score", username, NULL);
+        perror("Execl failed");
+        exit(-1);
+    }
+    else{
+        //parent process
+        close(pfd[1]);
+        char buff[256];
+        memset(buff, 0, sizeof(buff));
+        read(pfd[0], buff, sizeof(buff));
+        printf("%s", buff);
+
+        close(pfd[0]);
+        wait(NULL);
+    }
+    
+}
+
 void stop_monitor()
 {
     printf("Monitor is stopping...\n");
